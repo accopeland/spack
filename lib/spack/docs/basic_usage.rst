@@ -1,4 +1,4 @@
-.. Copyright 2013-2022 Lawrence Livermore National Security, LLC and other
+.. Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
    Spack Project Developers. See the top-level COPYRIGHT file for details.
 
    SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -1244,8 +1244,8 @@ For example, for the ``stackstart`` variant:
 
 .. code-block:: sh
 
-    mpileaks stackstart=4    # variant will be propagated to dependencies
-    mpileaks stackstart==4   # only mpileaks will have this variant value
+    mpileaks stackstart==4   # variant will be propagated to dependencies
+    mpileaks stackstart=4    # only mpileaks will have this variant value
 
 ^^^^^^^^^^^^^^
 Compiler Flags
