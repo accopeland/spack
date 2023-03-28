@@ -10,7 +10,8 @@ class Bbcp(Package):
     """Securely and quickly copy data from source to target"""
 
     homepage = "https://www.slac.stanford.edu/~abh/bbcp/"
-    git = "https://www.slac.stanford.edu/~abh/bbcp/bbcp.git"
+    #git = "https://www.slac.stanford.edu/~abh/bbcp/bbcp.git"
+    git = "https://github.com/eeertekin/bbcp.git"
 
     version("master", branch="master")
 
