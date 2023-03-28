@@ -193,7 +193,7 @@ config:
   # instance only ever has a single user at a time, and only if the user
   # anticipates that a significant delay indicates that the lock attempt will
   # never succeed.
-  package_lock_timeout: null
+  package_lock_timeout: 10
 
 
   # Control how shared libraries are located at runtime on Linux. See the

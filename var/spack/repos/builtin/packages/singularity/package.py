@@ -20,9 +20,10 @@ class Singularity(SingularityBase):
     tail -15 $(spack location -i singularity)/.spack/spack-build-out.txt
     """
 
-    homepage = "https://singularity.hpcng.org/"
+    homepage = "https://apptainer.org"
     git = "https://github.com/hpcng/singularity.git"
-    url = "https://github.com/hpcng/singularity/releases/download/v3.8.5/singularity-3.8.5.tar.gz"
+    #url = "https://github.com/hpcng/singularity/releases/download/v3.8.7/singularity-3.8.7.tar.gz"
+    #url = "https://github.com/apptainer/apptainer/commit/47190aa95d3fbd45b69a35e27fda816e3917f6c4"
 
     maintainers("alalazo")
 

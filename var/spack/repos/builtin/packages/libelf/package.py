@@ -34,6 +34,7 @@ class Libelf(AutotoolsPackage):
     depends_on("autoconf", when="platform=darwin", type="build")
     depends_on("libtool", when="platform=darwin", type="build")
     depends_on("m4", when="platform=darwin", type="build")
+    depends_on("pkg-config", type="build") # trying to sort out elfutils gelf.h missing
 
     @property
     def force_autoreconf(self):
