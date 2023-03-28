@@ -22,8 +22,7 @@ class Singularity(SingularityBase):
 
     homepage = "https://apptainer.org"
     git = "https://github.com/hpcng/singularity.git"
-    #url = "https://github.com/hpcng/singularity/releases/download/v3.8.7/singularity-3.8.7.tar.gz"
-    #url = "https://github.com/apptainer/apptainer/commit/47190aa95d3fbd45b69a35e27fda816e3917f6c4"
+    url = "https://github.com/hpcng/singularity/releases/download/v3.8.7/singularity-3.8.7.tar.gz"
 
     maintainers("alalazo")
 
