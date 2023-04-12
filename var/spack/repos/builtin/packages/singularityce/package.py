@@ -186,6 +186,8 @@ class Singularityce(SingularityBase):
     versions of Singularity (pre 3.0) you should use singularity-legacy,
     which has a different install base (Autotools).
 
+    SingularityCE is the Community Edition of Singularity, an open source container platform.
+
     Needs post-install chmod/chown steps to enable full functionality.
     See package definition or `spack-build-out.txt` build log for details,
     e.g.
@@ -193,13 +195,15 @@ class Singularityce(SingularityBase):
     tail -15 $(spack location -i singularity)/.spack/spack-build-out.txt
     """
 
+
     homepage = "https://sylabs.io/singularity/"
-    url = "https://github.com/sylabs/singularity/releases/download/v3.9.1/singularity-ce-3.9.1.tar.gz"
+    url = "https://github.com/sylabs/singularity/releases/download/v3.11.1/singularity-ce-3.11.1.tar.gz"
     git = "https://github.com/sylabs/singularity.git"
 
     maintainers("alalazo")
     version("master", branch="master")
 
+    version("3.11.1", sha256="93d1665b994ef17ae8ef3a0784ae94cade8435af0a3e4bad2efbac525938b457")
     version("3.10.3", sha256="f87d8e212ce209c5212d6faf253b97a24b5d0b6e6b17b5e58b316cdda27a332f")
     version("3.10.2", sha256="b4f279856ea4bf28a1f34f89320c02b545d6e57d4143679920e1ac4267f540e1")
     version("3.10.1", sha256="e3af12edc0260bc3a3a481459a3a4457de9235025e6b37288da80e3cdc011a7a")
