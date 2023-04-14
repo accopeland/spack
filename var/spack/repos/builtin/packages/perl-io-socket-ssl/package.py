@@ -19,8 +19,8 @@ class PerlIoSocketSsl(PerlPackage):
     depends_on("perl-net-ssleay", type=("build", "run"))
 
     def configure(self, spec, prefix):
-        self.build_method = "Makefile.PL"
-        self.build_executable = inspect.getmodule(self).make
+        #self.build_method = "Makefile.PL"
+        #self.build_executable = inspect.getmodule(self).make
         # Should I do external tests?
         config_answers = ["n\n"]
         config_answers_filename = "spack-config.in"
@@ -28,5 +28,5 @@ class PerlIoSocketSsl(PerlPackage):
         with open(config_answers_filename, "w") as f:
             f.writelines(config_answers)
 
-        with open(config_answers_filename, "r") as f:
-            inspect.getmodule(self).perl("Makefile.PL", "INSTALL_BASE={0}".format(prefix), input=f)
+        #with open(config_answers_filename, "r") as f:
+        #    inspect.getmodule(self).perl("Makefile.PL", "INSTALL_BASE={0}".format(prefix), input=f)
