@@ -8,10 +8,20 @@ import inspect
 from spack.package import *
 
 class PerlNetSsleay(PerlPackage):
-    """Perl extension for using OpenSSL"""
+    """Perl extension for using OpenSSL
+    
+     FIXME: partially broken
+     => Error: AttributeError: 'Adapter' object has no attribute 'build_method'
+
+The 'perl-io-socket-ssl' package cannot find an attribute while trying to build from sources. This might be due to a change in Spack's package format to support multiple build-systems for a single package. You can fix this by updating the build recipe, and you can also report the issue as a bug. More information at https://spack.readthedocs.io/en/latest/packaging_guide.html#installation-procedure
+
+    Attempted to preserve openssl fix from '#9783 perl-net-ssleay: fix build'  with a 'setup_build_environment()'
+
+    Commenting out configure entirely allows build/install to proceed but you have to know to hit <ENTER> to
+    get around the perl test questions
+    """
 
     homepage = "https://metacpan.org/pod/Net::SSLeay"
-    #url = "http://search.cpan.org/CPAN/authors/id/M/MI/MIKEM/Net-SSLeay-1.82.tar.gz"
     url = "https://cpan.metacpan.org/authors/id/C/CH/CHRISN/Net-SSLeay-1.93_02.tar.gz"
 
     version("1.93_02", sha256="1a11d1ae63e9fc85c90279085957aec81a15af985d7cff185b66154f7032fcdf")
@@ -28,16 +38,5 @@ class PerlNetSsleay(PerlPackage):
     depends_on("openssl")
     depends_on("perl-mime-base64")
 
-    def configure(self, spec, prefix):
-#        self.build_method = "Makefile.PL"
-#        self.build_executable = inspect.getmodule(self).make
-        # Do you want to run external tests?
-        config_answers = ["\n"]
-        config_answers_filename = "spack-config.in"
-
-        with open(config_answers_filename, "w") as f:
-            f.writelines(config_answers)
-
-        with open(config_answers_filename, "r") as f:
-            env["OPENSSL_PREFIX"] = self.spec["openssl"].prefix
-            #inspect.getmodule(self).perl("Makefile.PL", "INSTALL_BASE={0}".format(prefix), input=f)
+    def setup_build_environment(self, env):
+        env.set("OPENSSL_PREFIX", self.spec["openssl"].prefix)
