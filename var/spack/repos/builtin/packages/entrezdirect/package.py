@@ -12,10 +12,11 @@ class Entrezdirect(Package):
     gene, variation, expression, etc.) from a UNIX terminal window."""
 
     homepage = "https://www.ncbi.nlm.nih.gov/books/NBK179288/"
+    #url = "https://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/versions"
 
-    version(
-        "10.7.20190114", sha256="4152749e6a3aac71a64e9367527428714ed16cf1fb6c7eff1298cca9ef144c0d"
-    )
+    version("10.7.20190114", sha256="4152749e6a3aac71a64e9367527428714ed16cf1fb6c7eff1298cca9ef144c0d")
+    #https://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/versions/19.3.20230412
+    #version("19.3.20230412", sha256="")
 
     depends_on("perl", type="run")
     depends_on("perl-html-parser", type="run")
