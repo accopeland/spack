@@ -11,8 +11,13 @@ from spack.package import *
 class AsperaCli(Package):
     """The Aspera CLI client for the Fast and Secure Protocol (FASP)."""
 
-    homepage = "https://asperasoft.com"
-    url = "https://download.asperasoft.com/download/sw/cli/3.7.7/aspera-cli-3.7.7.608.927cce8-linux-64-release.sh"
+    #homepage = "https://asperasoft.com"
+    #url = "https://download.asperasoft.com/download/sw/cli/3.7.7/aspera-cli-3.7.7.608.927cce8-linux-64-release.sh"
+    homepage = "https://github.com/IBM/aspera-cli"
+    url = "https://github.com/IBM/aspera-cli/archive/refs/tags/v4.12.0.tar.gz"
+
+    version("4.12.0", sha256="0c5ecfe2d079350174065a1a76ce98ca47d2da361257d4eb67844367c33baab6")
+    #version("3.7.7", sha256="83efd03b699bdb1cac6c62befb3812342d6122217f4944f732ae7a135d578966")
 
     version(
         "3.7.7",
