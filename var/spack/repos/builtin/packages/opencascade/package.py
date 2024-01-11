@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -20,6 +20,8 @@ class Opencascade(CMakePackage):
     git = "https://git.dev.opencascade.org/repos/occt.git"
 
     maintainers("wdconinc")
+
+    license("LGPL-2.1-only")
 
     version(
         "7.7.1",
@@ -136,7 +138,7 @@ class Opencascade(CMakePackage):
     depends_on("tk", when="+tk")
     depends_on("gl")
 
-    conflicts("vtk@9.2", when="@:7.7.0 +vtk")
+    conflicts("^vtk@9.2", when="@:7.7.0 +vtk")
 
     def url_for_version(self, version):
         url = (

@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -60,7 +60,7 @@ class Cgal(CMakePackage):
 
     # Required for CGAL_ImageIO
     # depends_on('opengl', when='+imageio') # not yet in Spack
-    depends_on("zlib")
+    depends_on("zlib-api")
 
     # Optional to build CGAL_Qt5 (demos)
     # depends_on('opengl', when='+demos')   # not yet in Spack

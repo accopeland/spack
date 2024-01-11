@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -37,6 +37,8 @@ class Conduit(CMakePackage):
     url = "https://github.com/LLNL/conduit/releases/download/v0.3.0/conduit-v0.3.0-src-with-blt.tar.gz"
     git = "https://github.com/LLNL/conduit.git"
     tags = ["radiuss", "e4s"]
+
+    license("Apache-2.0")
 
     version("develop", branch="develop", submodules=True)
     # note: the main branch in conduit was renamed to develop, this next entry
@@ -183,6 +185,8 @@ class Conduit(CMakePackage):
     depends_on("py-sphinx", when="+python+doc", type="build")
     depends_on("py-sphinx-rtd-theme", when="+python+doc", type="build")
     depends_on("doxygen", when="+doc+doxygen")
+
+    conflicts("+parmetis", when="~mpi", msg="Parmetis support requires MPI")
 
     # Tentative patch for fj compiler
     # Cmake will support fj compiler and this patch will be removed
@@ -530,9 +534,9 @@ class Conduit(CMakePackage):
 
         if "+hdf5" in spec:
             cfg.write(cmake_cache_entry("HDF5_DIR", spec["hdf5"].prefix))
-            if "zlib" in spec:
+            if "zlib-api" in spec:
                 # HDF5 depends on zlib
-                cfg.write(cmake_cache_entry("ZLIB_DIR", spec["zlib"].prefix))
+                cfg.write(cmake_cache_entry("ZLIB_DIR", spec["zlib-api"].prefix))
         else:
             cfg.write("# hdf5 not built by spack \n")
 
