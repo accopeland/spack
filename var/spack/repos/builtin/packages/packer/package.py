@@ -2,6 +2,7 @@
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
+import os
 
 from spack.package import *
 
@@ -15,10 +16,11 @@ class Packer(GoPackage):
     url = "https://github.com/hashicorp/packer/archive/refs/tags/v1.9.5.tar.gz"
     git = "https://github.com/hashicorp/packer.git"
 
-    license("Hashicorp")
+    license("BULI-1")
 
     version("master", branch="master")
-    #version("1.10.0", sha256="d4f8c8741786c675b01a3be14dc24fb60baf69991908b1c4644277dae47cf946")
+    version("1.10.0", sha256="d4f8c8741786c675b01a3be14dc24fb60baf69991908b1c4644277dae47cf946")
+    #version("1.9.5", tag="v1.9.5", commit="6d28df4be6845e2e3216eab739904a4788acb172")
     version("1.9.5", sha256="a6da3e455578f5373c5e333023a7be483e9c22f4235ccd599fe39d42df55f870")
     version("1.9.4", sha256="c07db8375190668571077784f4a650514d6ef879ae45cb4c3c1717ad8308c47e")
     version("1.9.3", sha256="d13035521bb352b79fe9a09a0cb84f5d0a4619df06f71a5f8c22fbe6fbf922a4")
@@ -30,4 +32,18 @@ class Packer(GoPackage):
 
     depends_on("go@1.19:")
 
-    patch("var/spack/repos/builtin/packages/packer/build_for_linux_amd64_only.patch")
+    # use ./scripts/build.sh ?
+    # No, relies on gox and does 31 builds and assumes we are working in a git repo
+    #patch("build_for_linux_amd64_only.patch")
+
+    def build(self, spec, prefix):
+        go("build","-o","bin/packer")
+
+    #def url_for_version(self, version):
+    #    path_to_package = os.path.join(os.path.dirname(__file__))
+    #    return os.path.join(path_to_package,"v{}.tar.gz".format(version))
+
+    def install(self, spec, prefix):
+        mkdirp(prefix.bin)
+        # binary will be in bin/packer
+        install("bin/packer", prefix.bin)
