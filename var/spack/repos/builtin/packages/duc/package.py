@@ -55,13 +55,10 @@ class Duc(AutotoolsPackage):
     def setup_build_environment(self, env):
         env.set("LIBS", "-ltinfo")
 
-    def autoreconf(self, spec, prefix):
-        autoreconf("--install", "--verbose", "--force")
-
     def configure_args(self):
         # Need: LIBS="-ltinfo" ./configure --with-db-backend=sqlite3 --disable-cairo --disable-x11
         # args = ["--disable-ui", "--disable-cairo", "--disable-opengl", "--disable-x11"]
-        config_args=["--disable-x11", "--disable-opengl"] 
+        config_args=["--disable-x11", "--disable-opengl"]
         if self.spec.satisfies("+sqlite"):
             config_args.append("--with-db-backend=sqlite3")
         if self.spec.satisfies("+cairo"):
@@ -69,9 +66,6 @@ class Duc(AutotoolsPackage):
         if self.spec.satisfies("+ncurses"):
             config_args.append("--enable-ui")
         return config_args
-
-    def configure(self, spec, prefix):
-        configure()
 
     def install(self, spec, prefix):
         make("install", f"PREFIX={prefix}")
