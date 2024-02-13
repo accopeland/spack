@@ -6,18 +6,17 @@
 
 from spack.package import *
 
+
 class Tokyocabinet(AutotoolsPackage):
     """
-    A "modern" rewrite of DBM, Tokyo Cabinet is a library of routines for managing a database.
+    Tokyo Cabinet is a library of routines for managing a database.
     """
 
     homepage = "https://github.com/hthetiot/Tokyo-Cabinet"
     git = "https://github.com/hthetiot/Tokyo-Cabinet.git"
-    #version('1.1.47', tag='1.1.47') #, submodules=True)
+
     version("develop", branch="master")
+    version("1.1.47", commit="f8bd3c5")
 
-    license("LGPL")
+    license("UNKNOWN", checked_by="github_user1")
 
-    def install(self, spec, prefix):
-        make()
-        make("install")
