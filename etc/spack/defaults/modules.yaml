@@ -40,16 +40,7 @@ modules:
     roots:
      tcl:    $spack/share/spack/modules
      lmod:   $spack/share/spack/lmod
-    # What type of modules to use ("tcl" and/or "lmod")
-    enable: []
-
-    tcl:
-      all:
-        autoload: direct
-
     # Default configurations if lmod is enabled
     lmod:
-      all:
-        autoload: direct
-      hierarchy:
-        - mpi
+      core_compilers:
+      - gcc@=12.2.0
