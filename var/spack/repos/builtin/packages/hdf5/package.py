@@ -112,7 +112,10 @@ class Hdf5(CMakePackage):
     depends_on("cmake@3.12:", type="build")
     depends_on("cmake@3.18:", type="build", when="@1.13:")
 
-    depends_on("mpi", when="+mpi")
+    with when("+mpi"):
+        depends_on("mpi")
+        depends_on("mpich+fortran", when="+fortran ^[virtuals=mpi] mpich")
+
     depends_on("java", type=("build", "run"), when="+java")
     depends_on("szip", when="+szip")
     depends_on("zlib-api")
@@ -271,19 +274,9 @@ class Hdf5(CMakePackage):
 
     # The parallel compiler wrappers (i.e. h5pcc, h5pfc, etc.) reference MPI
     # compiler wrappers and do not need to be changed.
-    # These do not exist on Windows.
-    # Enable only for supported target platforms.
-    for spack_spec_target_platform in ["linux", "darwin", "cray"]:
-        filter_compiler_wrappers(
-            "h5cc",
-            "h5hlcc",
-            "h5fc",
-            "h5hlfc",
-            "h5c++",
-            "h5hlc++",
-            relative_root="bin",
-            when=f"platform={spack_spec_target_platform}",
-        )
+    filter_compiler_wrappers(
+        "h5cc", "h5hlcc", "h5fc", "h5hlfc", "h5c++", "h5hlc++", relative_root="bin"
+    )
 
     def url_for_version(self, version):
         url = (
