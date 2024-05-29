@@ -42,6 +42,9 @@ class Openmpi(AutotoolsPackage, CudaPackage):
 
     version("main", branch="main", submodules=True)
 
+    version("5.0.3", sha256="990582f206b3ab32e938aa31bbf07c639368e4405dca196fabe7f0f76eeda90b")
+    version("5.0.2", sha256="ee46ad8eeee2c3ff70772160bff877cbf38c330a0bc3b3ddc811648b3396698f")
+
     # Current
     version(
         "5.0.1", sha256="e357043e65fd1b956a47d0dae6156a90cf0e378df759364936c1781f1a25ef80"
@@ -517,6 +520,9 @@ class Openmpi(AutotoolsPackage, CudaPackage):
     variant("internal-pmix", default=False, description="Use internal pmix")
     variant("internal-libevent", default=False, description="Use internal libevent")
     variant("openshmem", default=False, description="Enable building OpenSHMEM")
+
+    # 
+    variant("mpi-fortran", default=True, description="Enable mpi-fortran")
 
     provides("mpi")
     provides("mpi@:2.2", when="@1.6.5")
@@ -1021,6 +1027,9 @@ class Openmpi(AutotoolsPackage, CudaPackage):
         if "~romio" in spec:
             config_args.append("--disable-io-romio")
 
+        if "~mpi-fortran" in spec:
+            config_args.append("--disable-mpi-fortran")
+
         if "+gpfs" in spec:
             config_args.append("--with-gpfs")
         else:
@@ -1121,6 +1130,7 @@ class Openmpi(AutotoolsPackage, CudaPackage):
 
         #       if spec.satisfies("@5.0.0:") and spec.satisfies("%oneapi"):
         #           config_args.append("--disable-io-romio")
+
 
         return config_args
 
