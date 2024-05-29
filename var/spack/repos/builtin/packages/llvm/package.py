@@ -37,6 +37,11 @@ class Llvm(CMakePackage, CudaPackage):
     license("Apache-2.0")
 
     version("main", branch="main")
+    version("18.1.5", sha256="d543309f55ae3f9b422108302b45c40f5696c96862f4bda8f5526955daa54284")
+    version("18.1.4", sha256="deca5a29e8b1d103ecc4badb3c304aca50d5cac6453364d88ee415dc55699dfb")
+    version("18.1.3", sha256="fc5a2fd176d73ceb17f4e522f8fe96d8dde23300b8c233476d3609f55d995a7a")
+    version("18.1.2", sha256="8d686d5ece6f12b09985cb382a3a530dc06bb6e7eb907f57c7f8bf2d868ebb0b")
+    version("18.1.1", sha256="62439f733311869dbbaf704ce2e02141d2a07092d952fc87ef52d1d636a9b1e4")
     version("17.0.4", sha256="46200b79f52a02fe26d0a43fd856ab6ceff49ab2a0b7c240ac4b700a6ada700c")
     version("17.0.3", sha256="1e3d9d04fb5fbd8d0080042ad72c7e2a5c68788b014b186647a604dbbdd625d2")
     version("17.0.2", sha256="dcba3eb486973dce45b6edfe618f3f29b703ae7e6ef9df65182fb50fb6fe4235")
