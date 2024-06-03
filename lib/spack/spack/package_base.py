@@ -64,10 +64,10 @@ from spack.install_test import (
     install_test_root,
 )
 from spack.installer import InstallError, PackageInstaller
-from spack.stage import DIYStage, ResourceStage, Stage, StageComposite, compute_stage_name
+from spack.stage import DevelopStage, ResourceStage, Stage, StageComposite, compute_stage_name
 from spack.util.executable import ProcessError, which
 from spack.util.package_hash import package_hash
-from spack.version import GitVersion, StandardVersion, Version
+from spack.version import GitVersion, StandardVersion
 
 FLAG_HANDLER_RETURN_TYPE = Tuple[
     Optional[Iterable[str]], Optional[Iterable[str]], Optional[Iterable[str]]
@@ -94,29 +94,26 @@ _spack_configure_argsfile = "spack-configure-args.txt"
 spack_times_log = "install_times.json"
 
 
-def deprecated_version(pkg, version):
-    """Return True if the version is deprecated, False otherwise.
+def deprecated_version(pkg: "PackageBase", version: Union[str, StandardVersion]) -> bool:
+    """Return True iff the version is deprecated.
 
     Arguments:
-        pkg (PackageBase): The package whose version is to be checked.
-        version (str or spack.version.StandardVersion): The version being checked
+        pkg: The package whose version is to be checked.
+        version: The version being checked
     """
     if not isinstance(version, StandardVersion):
-        version = Version(version)
+        version = StandardVersion.from_string(version)
 
-    for k, v in pkg.versions.items():
-        if version == k and v.get("deprecated", False):
-            return True
-
-    return False
+    details = pkg.versions.get(version)
+    return details is not None and details.get("deprecated", False)
 
 
-def preferred_version(pkg):
+def preferred_version(pkg: "PackageBase"):
     """
     Returns a sorted list of the preferred versions of the package.
 
     Arguments:
-        pkg (PackageBase): The package whose versions are to be assessed.
+        pkg: The package whose versions are to be assessed.
     """
     # Here we sort first on the fact that a version is marked
     # as preferred in the package, then on the fact that the
@@ -164,7 +161,11 @@ class WindowsRPath:
 
         Performs symlinking to incorporate rpath dependencies to Windows runtime search paths
         """
-        if sys.platform == "win32":
+        # If spec is an external, we should not be modifying its bin directory, as we would
+        # be doing in this method
+        # Spack should in general not modify things it has not installed
+        # we can reasonably expect externals to have their link interface properly established
+        if sys.platform == "win32" and not self.spec.external:
             self.win_rpath.add_library_dependent(*self.win_add_library_dependent())
             self.win_rpath.add_rpath(*self.win_add_rpath())
             self.win_rpath.establish_link()
@@ -471,7 +472,41 @@ def _names(when_indexed_dictionary):
     return sorted(all_names)
 
 
-class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
+class RedistributionMixin:
+    """Logic for determining whether a Package is source/binary
+    redistributable.
+    """
+
+    #: Store whether a given Spec source/binary should not be
+    #: redistributed.
+    disable_redistribute: Dict["spack.spec.Spec", "spack.directives.DisableRedistribute"]
+
+    # Source redistribution must be determined before concretization
+    # (because source mirrors work with un-concretized Specs).
+    @classmethod
+    def redistribute_source(cls, spec):
+        """Whether it should be possible to add the source of this
+        package to a Spack mirror.
+        """
+        for when_spec, disable_redistribute in cls.disable_redistribute.items():
+            if disable_redistribute.source and spec.satisfies(when_spec):
+                return False
+
+        return True
+
+    @property
+    def redistribute_binary(self):
+        """Whether it should be possible to create a binary out of an
+        installed instance of this package.
+        """
+        for when_spec, disable_redistribute in self.__class__.disable_redistribute.items():
+            if disable_redistribute.binary and self.spec.satisfies(when_spec):
+                return False
+
+        return True
+
+
+class PackageBase(WindowsRPath, PackageViewMixin, RedistributionMixin, metaclass=PackageMeta):
     """This is the superclass for all spack packages.
 
     ***The Package class***
@@ -569,6 +604,8 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
     provided: Dict["spack.spec.Spec", Set["spack.spec.Spec"]]
     provided_together: Dict["spack.spec.Spec", List[Set[str]]]
     patches: Dict["spack.spec.Spec", List["spack.patch.Patch"]]
+    variants: Dict[str, Tuple["spack.variant.Variant", "spack.spec.Spec"]]
+    languages: Dict["spack.spec.Spec", Set[str]]
 
     #: By default, packages are not virtual
     #: Virtual packages override this attribute
@@ -903,22 +940,16 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
 
     @classmethod
     @memoized
-    def version_urls(cls):
-        """OrderedDict of explicitly defined URLs for versions of this package.
+    def version_urls(cls) -> Dict[StandardVersion, str]:
+        """Dict of explicitly defined URLs for versions of this package.
 
         Return:
-           An OrderedDict (version -> URL) different versions of this
-           package, sorted by version.
+           An dict mapping version to url, ordered by version.
 
-        A version's URL only appears in the result if it has an an
-        explicitly defined ``url`` argument. So, this list may be empty
-        if a package only defines ``url`` at the top level.
+        A version's URL only appears in the result if it has an an explicitly defined ``url``
+        argument. So, this list may be empty if a package only defines ``url`` at the top level.
         """
-        version_urls = collections.OrderedDict()
-        for v, args in sorted(cls.versions.items()):
-            if "url" in args:
-                version_urls[v] = args["url"]
-        return version_urls
+        return {v: args["url"] for v, args in sorted(cls.versions.items()) if "url" in args}
 
     def nearest_url(self, version):
         """Finds the URL with the "closest" version to ``version``.
@@ -961,36 +992,39 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
         """
         pass
 
-    def all_urls_for_version(self, version):
+    def all_urls_for_version(self, version: StandardVersion) -> List[str]:
         """Return all URLs derived from version_urls(), url, urls, and
         list_url (if it contains a version) in a package in that order.
 
         Args:
-            version (spack.version.Version): the version for which a URL is sought
+            version: the version for which a URL is sought
         """
         uf = None
         if type(self).url_for_version != PackageBase.url_for_version:
             uf = self.url_for_version
         return self._implement_all_urls_for_version(version, uf)
 
-    def _implement_all_urls_for_version(self, version, custom_url_for_version=None):
-        if not isinstance(version, StandardVersion):
-            version = Version(version)
+    def _implement_all_urls_for_version(
+        self,
+        version: Union[str, StandardVersion],
+        custom_url_for_version: Optional[Callable[[StandardVersion], Optional[str]]] = None,
+    ) -> List[str]:
+        version = StandardVersion.from_string(version) if isinstance(version, str) else version
 
-        urls = []
+        urls: List[str] = []
 
         # If we have a specific URL for this version, don't extrapolate.
-        version_urls = self.version_urls()
-        if version in version_urls:
-            urls.append(version_urls[version])
+        url = self.version_urls().get(version)
+        if url:
+            urls.append(url)
 
         # if there is a custom url_for_version, use it
         if custom_url_for_version is not None:
             u = custom_url_for_version(version)
-            if u not in urls and u is not None:
+            if u is not None and u not in urls:
                 urls.append(u)
 
-        def sub_and_add(u):
+        def sub_and_add(u: Optional[str]) -> None:
             if u is None:
                 return
             # skip the url if there is no version to replace
@@ -998,9 +1032,7 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
                 spack.url.parse_version(u)
             except spack.url.UndetectableVersionError:
                 return
-            nu = spack.url.substitute_version(u, self.url_version(version))
-
-            urls.append(nu)
+            urls.append(spack.url.substitute_version(u, self.url_version(version)))
 
         # If no specific URL, use the default, class-level URL
         sub_and_add(getattr(self, "url", None))
@@ -1082,7 +1114,12 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
         # If it's a dev package (not transitively), use a DIY stage object
         dev_path_var = self.spec.variants.get("dev_path", None)
         if dev_path_var:
-            return DIYStage(dev_path_var.value)
+            dev_path = dev_path_var.value
+            link_format = spack.config.get("config:develop_stage_link")
+            if not link_format:
+                link_format = "build-{arch}-{hash:7}"
+            stage_link = self.spec.format_path(link_format)
+            return DevelopStage(compute_stage_name(self.spec), dev_path, stage_link)
 
         # To fetch the current version
         source_stage = self._make_root_stage(self.fetcher)
@@ -1131,13 +1168,7 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
     @property
     def env_path(self):
         """Return the build environment file path associated with staging."""
-        # Backward compatibility: Return the name of an existing log path;
-        # otherwise, return the current install env path name.
-        old_filename = os.path.join(self.stage.path, "spack-build.env")
-        if os.path.exists(old_filename):
-            return old_filename
-        else:
-            return os.path.join(self.stage.path, _spack_build_envfile)
+        return os.path.join(self.stage.path, _spack_build_envfile)
 
     @property
     def env_mods_path(self):
@@ -1168,13 +1199,6 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
     @property
     def log_path(self):
         """Return the build log file path associated with staging."""
-        # Backward compatibility: Return the name of an existing log path.
-        for filename in ["spack-build.out", "spack-build.txt"]:
-            old_log = os.path.join(self.stage.path, filename)
-            if os.path.exists(old_log):
-                return old_log
-
-        # Otherwise, return the current log path name.
         return os.path.join(self.stage.path, _spack_build_logfile)
 
     @property
@@ -1187,15 +1211,15 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
 
     @property
     def install_log_path(self):
-        """Return the build log file path on successful installation."""
+        """Return the (compressed) build log file path on successful installation"""
         # Backward compatibility: Return the name of an existing install log.
-        for filename in ["build.out", "build.txt"]:
+        for filename in [_spack_build_logfile, "build.out", "build.txt"]:
             old_log = os.path.join(self.metadata_dir, filename)
             if os.path.exists(old_log):
                 return old_log
 
         # Otherwise, return the current install log path name.
-        return os.path.join(self.metadata_dir, _spack_build_logfile)
+        return os.path.join(self.metadata_dir, _spack_build_logfile + ".gz")
 
     @property
     def configure_args_path(self):
@@ -1220,7 +1244,7 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
         """Return the install test root directory."""
         tty.warn(
             "The 'pkg.install_test_root' property is deprecated with removal "
-            "expected v0.22. Use 'install_test_root(pkg)' instead."
+            "expected v0.23. Use 'install_test_root(pkg)' instead."
         )
         return install_test_root(self)
 
@@ -1427,7 +1451,7 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
             return
 
         checksum = spack.config.get("config:checksum")
-        fetch = self.stage.managed_by_spack
+        fetch = self.stage.needs_fetching
         if (
             checksum
             and fetch
@@ -1500,9 +1524,6 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
         if self.has_code:
             self.do_fetch(mirror_only)
             self.stage.expand_archive()
-
-            if not os.listdir(self.stage.path):
-                raise spack.error.FetchError("Archive was empty for %s" % self.name)
         else:
             # Support for post-install hooks requires a stage.source_path
             fsys.mkdirp(self.stage.source_path)
@@ -1536,7 +1557,7 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
         # If we encounter an archive that failed to patch, restage it
         # so that we can apply all the patches again.
         if os.path.isfile(bad_file):
-            if self.stage.managed_by_spack:
+            if self.stage.requires_patch_success:
                 tty.debug("Patching failed last time. Restaging.")
                 self.stage.restage()
             else:
@@ -1557,6 +1578,8 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
             tty.msg("No patches needed for {0}".format(self.name))
             return
 
+        errors = []
+
         # Apply all the patches for specs that match this one
         patched = False
         for patch in patches:
@@ -1566,12 +1589,16 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
                 tty.msg("Applied patch {0}".format(patch.path_or_url))
                 patched = True
             except spack.error.SpackError as e:
-                tty.debug(e)
-
                 # Touch bad file if anything goes wrong.
-                tty.msg("Patch %s failed." % patch.path_or_url)
                 fsys.touch(bad_file)
-                raise
+                error_msg = f"Patch {patch.path_or_url} failed."
+                if self.stage.requires_patch_success:
+                    tty.msg(error_msg)
+                    raise
+                else:
+                    tty.debug(error_msg)
+                    tty.debug(e)
+                    errors.append(e)
 
         if has_patch_fun:
             try:
@@ -1589,24 +1616,29 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
                     # printed a message for each patch.
                     tty.msg("No patches needed for {0}".format(self.name))
             except spack.error.SpackError as e:
-                tty.debug(e)
-
                 # Touch bad file if anything goes wrong.
-                tty.msg("patch() function failed for {0}".format(self.name))
                 fsys.touch(bad_file)
-                raise
+                error_msg = f"patch() function failed for {self.name}"
+                if self.stage.requires_patch_success:
+                    tty.msg(error_msg)
+                    raise
+                else:
+                    tty.debug(error_msg)
+                    tty.debug(e)
+                    errors.append(e)
 
-        # Get rid of any old failed file -- patches have either succeeded
-        # or are not needed.  This is mostly defensive -- it's needed
-        # if the restage() method doesn't clean *everything* (e.g., for a repo)
-        if os.path.isfile(bad_file):
-            os.remove(bad_file)
+        if not errors:
+            # Get rid of any old failed file -- patches have either succeeded
+            # or are not needed.  This is mostly defensive -- it's needed
+            # if we didn't restage
+            if os.path.isfile(bad_file):
+                os.remove(bad_file)
 
-        # touch good or no patches file so that we skip next time.
-        if patched:
-            fsys.touch(good_file)
-        else:
-            fsys.touch(no_patches_file)
+            # touch good or no patches file so that we skip next time.
+            if patched:
+                fsys.touch(good_file)
+            else:
+                fsys.touch(no_patches_file)
 
     @classmethod
     def all_patches(cls):
@@ -1849,7 +1881,10 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
             verbose (bool): Display verbose build output (by default,
                 suppresses it)
         """
-        PackageInstaller([(self, kwargs)]).install()
+        explicit = kwargs.get("explicit", True)
+        if isinstance(explicit, bool):
+            kwargs["explicit"] = {self.spec.dag_hash()} if explicit else set()
+        PackageInstaller([self], kwargs).install()
 
     # TODO (post-34236): Update tests and all packages that use this as a
     # TODO (post-34236): package method to the routine made available to
@@ -1870,7 +1905,7 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
         """
         msg = (
             "'pkg.cache_extra_test_sources(srcs) is deprecated with removal "
-            "expected in v0.22. Use 'cache_extra_test_sources(pkg, srcs)' "
+            "expected in v0.23. Use 'cache_extra_test_sources(pkg, srcs)' "
             "instead."
         )
         warnings.warn(msg)
@@ -2087,15 +2122,6 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
             (bool): ``True`` to continue, ``False`` to skip ``install()``
         """
         return True
-
-    @property
-    def build_log_path(self):
-        """
-        Return the expected (or current) build log file path.  The path points
-        to the staging build file until the software is successfully installed,
-        when it points to the file in the installation directory.
-        """
-        return self.install_log_path if self.spec.installed else self.log_path
 
     @classmethod
     def inject_flags(cls: Type[Pb], name: str, flags: Iterable[str]) -> FLAG_HANDLER_RETURN_TYPE:
@@ -2380,15 +2406,14 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
         return results.getvalue()
 
     @property
-    def all_urls(self):
+    def all_urls(self) -> List[str]:
         """A list of all URLs in a package.
 
         Check both class-level and version-specific URLs.
 
-        Returns:
-            list: a list of URLs
+        Returns a list of URLs
         """
-        urls = []
+        urls: List[str] = []
         if hasattr(self, "url") and self.url:
             urls.append(self.url)
 
@@ -2401,7 +2426,9 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
                 urls.append(args["url"])
         return urls
 
-    def fetch_remote_versions(self, concurrency=None):
+    def fetch_remote_versions(
+        self, concurrency: Optional[int] = None
+    ) -> Dict[StandardVersion, str]:
         """Find remote versions of this package.
 
         Uses ``list_url`` and any other URLs listed in the package file.
@@ -2426,9 +2453,18 @@ class PackageBase(WindowsRPath, PackageViewMixin, metaclass=PackageMeta):
 
         # on Windows, libraries of runtime interest are typically
         # stored in the bin directory
+        # Do not include Windows system libraries in the rpath interface
+        # these libraries are handled automatically by VS/VCVARS and adding
+        # Spack derived system libs into the link path or address space of a program
+        # can result in conflicting versions, which makes Spack packages less useable
         if sys.platform == "win32":
             rpaths = [self.prefix.bin]
-            rpaths.extend(d.prefix.bin for d in deps if os.path.isdir(d.prefix.bin))
+            rpaths.extend(
+                d.prefix.bin
+                for d in deps
+                if os.path.isdir(d.prefix.bin)
+                and "windows-system" not in getattr(d.package, "tags", [])
+            )
         else:
             rpaths = [self.prefix.lib, self.prefix.lib64]
             rpaths.extend(d.prefix.lib for d in deps if os.path.isdir(d.prefix.lib))
@@ -2535,7 +2571,12 @@ class PackageStillNeededError(InstallError):
     """Raised when package is still needed by another on uninstall."""
 
     def __init__(self, spec, dependents):
-        super().__init__("Cannot uninstall %s" % spec)
+        spec_fmt = spack.spec.DEFAULT_FORMAT + " /{hash:7}"
+        dep_fmt = "{name}{@versions} /{hash:7}"
+        super().__init__(
+            f"Cannot uninstall {spec.format(spec_fmt)}, "
+            f"needed by {[dep.format(dep_fmt) for dep in dependents]}"
+        )
         self.spec = spec
         self.dependents = dependents
 

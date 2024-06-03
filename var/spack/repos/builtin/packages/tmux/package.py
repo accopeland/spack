@@ -58,6 +58,8 @@ class Tmux(AutotoolsPackage):
     depends_on("automake", when="@master")
     depends_on("autoconf", when="@master")
 
+    depends_on("yacc", type="build", when="@3:")
+
     conflicts("+static", when="platform=darwin", msg="Static build not supported on MacOS")
 
     @run_before("autoreconf")
