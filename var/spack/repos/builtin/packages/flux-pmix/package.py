@@ -25,7 +25,7 @@ class FluxPmix(AutotoolsPackage):
     depends_on("flux-core@0.49:", when="@0.3:")
     depends_on("flux-core@0.30.0:")
     depends_on("pmix@v4.1.0:")
-    depends_on("openmpi")
+    depends_on("openmpi@5.0:")
 
     depends_on("pkgconfig", type="build")
     depends_on("autoconf", type="build")
