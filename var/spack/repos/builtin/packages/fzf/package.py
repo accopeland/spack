@@ -19,6 +19,13 @@ class Fzf(MakefilePackage):
 
     license("MIT")
 
+    version("0.53.0", sha256="d45abbfb64f21913c633d46818d9d3eb3d7ebc7e94bd16f45941958aa5480e1d")
+    version("0.52.1", sha256="96848746ca78249c1fdd16f170776ce2f667097b60e4ffbd5ecdbd7dfac72ef9")
+    version("0.52.0", sha256="d1f2c32b4f095457fdd7c22fe51ac99260ac8d066f49d5dec4f0e097a240dbc0")
+    version("0.51.0", sha256="64b3616700cff7b00785607771fc05023219eff24c54981e2497977fc7a6dd76")
+    version("0.50.0", sha256="3dd8f57eb58c039d343c23fbe1b4f03e441eb796d564c959f8241106805370d0")
+    version("0.49.0", sha256="e3abb3afcfacf3dfea3144bf801c39fa51ee8ce65c1e8d8ff14521b3d7d2e249")
+
     version("0.48.1", sha256="c8dbb545d651808ef4e1f51edba177fa918ea56ac53376c690dc6f2dd0156a71")
     version("0.47.0", sha256="bc566cb4630418bc9981898d3350dbfddc114637a896acaa8d818a51945bdf30")
     version("0.46.1", sha256="b0d640be3ae79980fdf461096f7d9d36d38ec752e25f8c4d2ca3ca6c041c2491")
