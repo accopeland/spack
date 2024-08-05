@@ -34,6 +34,7 @@ class Podman(Package):
     patch("markdown-utf8.diff", when="@4:4.3.1")
 
     depends_on("go", type="build")
+    depends_on("go@1.16:", when="@4.1:", type="build")
     depends_on("go-md2man", type="build")
     depends_on("pkgconfig", type="build")
     depends_on("cni-plugins", type="run")
@@ -44,6 +45,8 @@ class Podman(Package):
     depends_on("libassuan")
     depends_on("libgpg-error")
     depends_on("libseccomp")
+    depends_on("netavark", when="@4.1:", type=("build","run")) # netavark replaces CNI with podman@4.1
+    depends_on("nftables", when="@4.1:", type="run")
 
     def patch(self):
         defs = FileFilter("vendor/github.com/containers/common/pkg/config/default.go")
