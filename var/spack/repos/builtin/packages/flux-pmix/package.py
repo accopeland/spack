@@ -28,7 +28,7 @@ class FluxPmix(AutotoolsPackage):
     depends_on("flux-core@0.49:", when="@0.3:")
     depends_on("flux-core@0.30.0:")
     depends_on("pmix@v4.1.0:")
-    depends_on("openmpi")
+    depends_on("openmpi@5.0:")
 
     depends_on("pkgconfig", type="build")
     depends_on("autoconf", type="build")
@@ -57,8 +57,8 @@ class FluxPmix(AutotoolsPackage):
 
     def setup_run_environment(self, env):
         spec = self.spec
-        env.prepend_path("FLUX_SHELL_RC_PATH", join_path(self.prefix, "etc/flux/shell/lua.d"))
+        env.prepend_path("FLUX_SHELL_RC_PATH", join_path(self.prefix.etc, "flux/shell/lua.d"))
         if spec.satisfies("@0.3.0:"):
             env.prepend_path(
-                "FLUX_PMI_CLIENT_SEARCHPATH", join_path(self.prefix, "flux/upmi/plugins")
+                "FLUX_PMI_CLIENT_SEARCHPATH", join_path(self.prefix.lib, "flux/upmi/plugins")
             )

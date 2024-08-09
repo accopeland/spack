@@ -18,4 +18,4 @@ class RubyGist(RubyPackage):
         expand=False,
     )
 
-    depends_on("ruby@1.8:2", type=("build", "run"))
+    #depends_on("ruby@1.8:2", type=("build", "run"))

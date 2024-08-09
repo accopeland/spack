@@ -568,6 +568,9 @@ class Openmpi(AutotoolsPackage, CudaPackage):
     variant("internal-libevent", default=False, description="Use internal libevent")
     variant("openshmem", default=False, description="Enable building OpenSHMEM")
 
+    # 
+    variant("mpi-fortran", default=True, description="Enable mpi-fortran")
+
     provides("mpi")
     provides("mpi@:2.2", when="@1.6.5")
     provides("mpi@:3.0", when="@1.7.5:")
@@ -1088,6 +1091,10 @@ class Openmpi(AutotoolsPackage, CudaPackage):
             )
         elif spec.satisfies("@1.7.4:"):
             config_args.extend(["--disable-java", "--disable-mpi-java"])
+
+        # fortran
+        if "~mpi-fortran" in spec:
+            config_args.append("--disable-mpi-fortran")
 
         # Romio
         if "~romio" in spec:

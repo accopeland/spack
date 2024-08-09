@@ -14,12 +14,23 @@
 #   ~/.spack/packages.yaml
 # -------------------------------------------------------------------------
 packages:
+  slurm:
+    externals:
+    - spec: slurm@22.05.11
+      prefix: /usr
+    buildable: false
+  pmix:
+    externals:
+    - spec: pmix@4.1.3
+      prefix: /usr
+    buildable: false
   all:
     compiler: [gcc, clang, oneapi, xl, nag, fj, aocc]
     providers:
       awk: [gawk]
       armci: [armcimpi]
       blas: [openblas, amdblis]
+      cxx: [gcc]
       D: [ldc]
       daal: [intel-oneapi-daal]
       elf: [elfutils]
