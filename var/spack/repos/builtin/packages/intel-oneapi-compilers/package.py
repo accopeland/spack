@@ -10,6 +10,28 @@ from spack.package import *
 
 versions = [
     {
+        "version": "2024.2.1",
+        "cpp": {
+            "url": "https://registrationcenter-download.intel.com/akdlm/IRC_NAS/74587994-3c83-48fd-b963-b707521a63f4/l_dpcpp-cpp-compiler_p_2024.2.1.79_offline.sh",
+            "sha256": "af0243f80640afa94c7f9c8151da91d7ab17f448f542fa76d785230dec712048",
+        },
+        "ftn": {
+            "url": "https://registrationcenter-download.intel.com/akdlm/IRC_NAS/5e7b0f1c-6f25-4cc8-94d7-3a527e596739/l_fortran-compiler_p_2024.2.1.80_offline.sh",
+            "sha256": "6f6dab82a88082a7a39f6feb699343c521f58c6481a1bb87edba7e2550995b6d",
+        },
+    },
+    {
+        "version": "2024.2.0",
+        "cpp": {
+            "url": "https://registrationcenter-download.intel.com/akdlm/IRC_NAS/6780ac84-6256-4b59-a647-330eb65f32b6/l_dpcpp-cpp-compiler_p_2024.2.0.495_offline.sh",
+            "sha256": "9463aa979314d2acc51472d414ffcee032e9869ca85ac6ff4c71d39500e5173d",
+        },
+        "ftn": {
+            "url": "https://registrationcenter-download.intel.com/akdlm/IRC_NAS/801143de-6c01-4181-9911-57e00fe40181/l_fortran-compiler_p_2024.2.0.426_offline.sh",
+            "sha256": "fd19a302662b2f86f76fc115ef53a69f16488080278dba4c573cc705f3a52ffa",
+        },
+    },
+    {
         "version": "2024.1.0",
         "cpp": {
             "url": "https://registrationcenter-download.intel.com/akdlm/IRC_NAS/2e562b6e-5d0f-4001-8121-350a828332fb/l_dpcpp-cpp-compiler_p_2024.1.0.468_offline.sh",
@@ -223,7 +245,8 @@ versions = [
 
 @IntelOneApiPackage.update_description
 class IntelOneapiCompilers(IntelOneApiPackage, CompilerPackage):
-    """Intel oneAPI Compilers. Includes: icc, icpc, ifort, icx, icpx, and ifx."""
+    """Intel oneAPI Compilers. Includes: icx, icpx, ifx, and ifort.
+    Releases before 2024.0 include icc/icpc"""
 
     maintainers("rscohn2")
 
@@ -239,7 +262,7 @@ class IntelOneapiCompilers(IntelOneApiPackage, CompilerPackage):
     )
 
     # See https://github.com/spack/spack/issues/39252
-    depends_on("patchelf@:0.17", type="build")
+    depends_on("patchelf@:0.17", type="build", when="@:2024.1")
 
     # TODO: effectively gcc is a direct dependency of intel-oneapi-compilers, but we
     # cannot express that properly. For now, add conflicts for non-gcc compilers
@@ -327,6 +350,12 @@ class IntelOneapiCompilers(IntelOneApiPackage, CompilerPackage):
         # issues. I am using the 2024 release as a milestone to stop
         # patching everything and just patching the binaries that have
         # a problem.
+
+        # 2024.2 no longer needs patching
+        if self.spec.satisfies("@2024.2:"):
+            return
+
+        # 2024 fixed all but these 2
         patchelf = which("patchelf")
         if self.spec.satisfies("@2024:"):
             patchelf.add_default_arg("--set-rpath", self.component_prefix.lib)

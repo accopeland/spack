@@ -20,6 +20,10 @@ class BigdftAtlab(AutotoolsPackage):
     version("1.9.1", sha256="3c334da26d2a201b572579fc1a7f8caad1cbf971e848a3e10d83bc4dc8c82e41")
     version("1.9.0", sha256="4500e505f5a29d213f678a91d00a10fef9dc00860ea4b3edf9280f33ed0d1ac8")
 
+    depends_on("c", type="build")  # generated
+    depends_on("cxx", type="build")  # generated
+    depends_on("fortran", type="build")  # generated
+
     variant("mpi", default=True, description="Enable MPI support")
     variant("openmp", default=True, description="Enable OpenMP support")
     variant("openbabel", default=False, description="Enable detection of openbabel compilation")
@@ -47,7 +51,7 @@ class BigdftAtlab(AutotoolsPackage):
         cflags = []
         cxxflags = []
 
-        if "+openmp" in spec:
+        if spec.satisfies("+openmp"):
             fcflags.append(self.compiler.openmp_flag)
 
         if spec.satisfies("+shared"):
@@ -70,7 +74,7 @@ class BigdftAtlab(AutotoolsPackage):
         if spec.satisfies("+shared"):
             args.append("--enable-dynamic-libraries")
 
-        if "+mpi" in spec:
+        if spec.satisfies("+mpi"):
             args.append(f"CC={spec['mpi'].mpicc}")
             args.append(f"CXX={spec['mpi'].mpicxx}")
             args.append(f"FC={spec['mpi'].mpifc}")
@@ -79,12 +83,12 @@ class BigdftAtlab(AutotoolsPackage):
         else:
             args.append("--disable-mpi")
 
-        if "+openmp" in spec:
+        if spec.satisfies("+openmp"):
             args.append("--with-openmp")
         else:
             args.append("--without-openmp")
 
-        if "+openbabel" in spec:
+        if spec.satisfies("+openbabel"):
             args.append("--enable-openbabel")
             args.append(f"--with-openbabel-libs={spec['openbabel'].prefix.lib}")
             args.append(f"--with-openbabel-incs={spec['openbabel'].prefix.include}")
