@@ -1,14 +1,9 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 """Test detection of compiler version"""
-import os
-import sys
-
 import pytest
-
-import llnl.util.filesystem as fs
 
 import spack.compilers.aocc
 import spack.compilers.arm
@@ -24,7 +19,6 @@ import spack.compilers.pgi
 import spack.compilers.xl
 import spack.compilers.xl_r
 import spack.util.module_cmd
-from spack.operating_systems.cray_frontend import CrayFrontend
 
 
 @pytest.mark.parametrize(
@@ -36,7 +30,7 @@ from spack.operating_systems.cray_frontend import CrayFrontend
             "Thread model: posix\n"
             "InstalledDir:\n"
             "/opt/arm/arm-hpc-compiler-19.0_Generic-AArch64_RHEL-7_aarch64-linux/bin\n",
-            "19.0.0.73",
+            "19.0",
         ),
         (
             "Arm C/C++/Fortran Compiler version 19.3.1 (build number 75) (based on LLVM 7.0.2)\n"
@@ -44,7 +38,7 @@ from spack.operating_systems.cray_frontend import CrayFrontend
             "Thread model: posix\n"
             "InstalledDir:\n"
             "/opt/arm/arm-hpc-compiler-19.0_Generic-AArch64_RHEL-7_aarch64-linux/bin\n",
-            "19.3.1.75",
+            "19.3.1",
         ),
     ],
 )
@@ -263,6 +257,11 @@ def test_intel_version_detection(version_str, expected_version):
             "Copyright (C) 1985-2021 Intel Corporation. All rights reserved.",
             "2022.0.0",
         ),
+        (  # IFX
+            "ifx (IFX) 2023.1.0 20230320\n"
+            "Copyright (C) 1985-2023 Intel Corporation. All rights reserved.",
+            "2023.1.0",
+        ),
     ],
 )
 def test_oneapi_version_detection(version_str, expected_version):
@@ -276,7 +275,7 @@ def test_oneapi_version_detection(version_str, expected_version):
         (
             "NAG Fortran Compiler Release 6.0(Hibiya) Build 1037\n"
             "Product NPL6A60NA for x86-64 Linux\n",
-            "6.0",
+            "6.0.1037",
         )
     ],
 )
@@ -407,48 +406,6 @@ def test_xl_version_detection(version_str, expected_version):
 
     version = spack.compilers.xl_r.XlR.extract_version_from_output(version_str)
     assert version == expected_version
-
-
-@pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows (yet)")
-@pytest.mark.parametrize(
-    "compiler,version",
-    [
-        ("gcc", "8.1.0"),
-        ("gcc", "1.0.0-foo"),
-        ("pgi", "19.1"),
-        ("pgi", "19.1a"),
-        ("intel", "9.0.0"),
-        ("intel", "0.0.0-foobar")
-        # ('oneapi', '2021.1'),
-        # ('oneapi', '2021.1-foobar')
-    ],
-)
-def test_cray_frontend_compiler_detection(compiler, version, tmpdir, monkeypatch, working_env):
-    """Test that the Cray frontend properly finds compilers form modules"""
-    # setup the fake compiler directory
-    compiler_dir = tmpdir.join(compiler)
-    compiler_exe = compiler_dir.join("cc").ensure()
-    fs.set_executable(str(compiler_exe))
-
-    # mock modules
-    def _module(cmd, *args):
-        module_name = "%s/%s" % (compiler, version)
-        module_contents = "prepend-path PATH %s" % compiler_dir
-        if cmd == "avail":
-            return module_name if compiler in args[0] else ""
-        if cmd == "show":
-            return module_contents if module_name in args else ""
-
-    monkeypatch.setattr(spack.operating_systems.cray_frontend, "module", _module)
-
-    # remove PATH variable
-    os.environ.pop("PATH", None)
-
-    # get a CrayFrontend object
-    cray_fe_os = CrayFrontend()
-
-    paths = cray_fe_os.compiler_search_paths
-    assert paths == [str(compiler_dir)]
 
 
 @pytest.mark.parametrize(

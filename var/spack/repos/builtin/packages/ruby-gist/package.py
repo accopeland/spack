@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -18,4 +18,4 @@ class RubyGist(RubyPackage):
         expand=False,
     )
 
-    depends_on("ruby@1.8:2", type=("build", "run"))
+    #depends_on("ruby@1.8:2", type=("build", "run"))

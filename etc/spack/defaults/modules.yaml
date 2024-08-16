@@ -6,12 +6,19 @@ modules:
   default:
     # Where to install modules
     roots:
-      tcl:    $spack/share/spack/modules
-      lmod:   $spack/share/spack/lmod
+     tcl:    $spack/share/spack/modules
+     lmod:   $spack/share/spack/lmod
     # What type of modules to use
-    enable::
-      - lmod
+    enable:
+      - tcl
+
+    tcl:
+      all:
+        autoload: direct
+
+    # Default configurations if lmod is enabled
     lmod:
-      verbose: True
-      exclude_implicits: True
-      hash_length: 0
+      all:
+        autoload: direct
+      hierarchy:
+        - mpi

@@ -1,44 +1,30 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
-# ----------------------------------------------------------------------------
-# If you submit this package back to Spack as a pull request,
-# please first remove this boilerplate and all FIXME comments.
-#
-# This is a template package file for Spack.  We've put "FIXME"
-# next to all the things you'll want to change. Once you've handled
-# them, you can save this file and test your package like this:
-#
-#     spack install py-globus-cli
-#
-# You can edit this file again by typing:
-#
-#     spack edit py-globus-cli
-#
-# See the Spack documentation for more information on packaging.
-# ----------------------------------------------------------------------------
 
 from spack.package import *
 
 
 class PyGlobusCli(PythonPackage):
-    """A Command Line Wrapper over the Globus SDK for Python"""
+    """Globus CLI is a standalone application that can be installed on the user's machine
+    and is used to access the Globus service. The CLI provides an interface to Globus
+    services from the shell, and is suited to both interactive and simple scripting use cases."""
 
     homepage = "https://docs.globus.org/cli"
 
-    url = "https://github.com/globus/globus-cli/archive/refs/tags/3.12.0.tar.gz"
+    maintainers("climbfuji")
 
-    version("3.12.0", sha256="177eab00e362ae84d81a655a94c98cb7e5a09e5b5286f8ba5c34e773d598e762")
+    version("3.16.0", sha256="0ef721060870d9346505e52b9bf30c7bed6ae136cc08762deb2f8893bd25d8c5")
 
-    depends_on("py-pip", type="build")
-    depends_on("py-globus-sdk", type="run")
+    depends_on("python@3.7:", type=("build", "run"))
+    depends_on("py-setuptools", type="build")
+    depends_on("py-globus-sdk@3.25.0", type=("build", "run"))
 
-    def global_options(self, spec, prefix):
-        options = []
-        return options
-
-    def install_options(self, spec, prefix):
-        options = []
-        return options
+    depends_on("python@3.7:", type=("build", "run"))
+    depends_on("py-setuptools", type="build")
+    depends_on("py-globus-sdk@3.25.0", type=("build", "run"))
+    depends_on("py-click@8", type=("build", "run"))
+    depends_on("py-jmespath@1.0.1", type=("build", "run"))
+    depends_on("py-packaging@17:", type=("build", "run"))

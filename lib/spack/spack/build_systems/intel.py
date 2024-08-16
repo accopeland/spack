@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -142,7 +142,7 @@ class IntelPackage(Package):
         # The Intel libraries are provided without requiring a license as of
         # version 2017.2. Trying to specify one anyway will fail. See:
         # https://software.intel.com/en-us/articles/free-ipsxe-tools-and-libraries
-        return self._has_compilers or self.version < ver("2017.2")
+        return self._has_compilers or self.version < Version("2017.2")
 
     #: Comment symbol used in the license.lic file
     license_comment = "#"
@@ -218,7 +218,7 @@ class IntelPackage(Package):
             "+inspector": " intel-inspector",
             "+itac": " intel-itac intel-ta intel-tc" " intel-trace-analyzer intel-trace-collector",
             # Trace Analyzer and Collector
-            "+vtune": " intel-vtune"
+            "+vtune": " intel-vtune",
             # VTune, ..-profiler since 2020, ..-amplifier before
         }.items():
             if variant in self.spec:
@@ -341,7 +341,7 @@ class IntelPackage(Package):
                     v_year = year
                     break
 
-        return ver("%s.%s" % (v_year, v_tail))
+        return Version("%s.%s" % (v_year, v_tail))
 
     # ---------------------------------------------------------------------
     # Directory handling common to all Intel components
@@ -764,9 +764,9 @@ class IntelPackage(Package):
         elif matches:
             # TODO: Confirm that this covers clang (needed on Linux only)
             gcc_version = Version(matches.groups()[1])
-            if gcc_version >= ver("4.7"):
+            if gcc_version >= Version("4.7"):
                 abi = "gcc4.7"
-            elif gcc_version >= ver("4.4"):
+            elif gcc_version >= Version("4.4"):
                 abi = "gcc4.4"
             else:
                 abi = "gcc4.1"  # unlikely, one hopes.
@@ -846,6 +846,7 @@ class IntelPackage(Package):
             "^mpich@2:" in spec_root
             or "^cray-mpich" in spec_root
             or "^mvapich2" in spec_root
+            or "^mvapich" in spec_root
             or "^intel-mpi" in spec_root
             or "^intel-oneapi-mpi" in spec_root
             or "^intel-parallel-studio" in spec_root
@@ -936,32 +937,15 @@ class IntelPackage(Package):
             "I_MPI_ROOT": self.normalize_path("mpi"),
         }
 
-        # CAUTION - SIMILAR code in:
-        #   var/spack/repos/builtin/packages/mpich/package.py
-        #   var/spack/repos/builtin/packages/openmpi/package.py
-        #   var/spack/repos/builtin/packages/mvapich2/package.py
-        #
-        # On Cray, the regular compiler wrappers *are* the MPI wrappers.
-        if "platform=cray" in self.spec:
-            # TODO: Confirm
-            wrapper_vars.update(
-                {
-                    "MPICC": compilers_of_client["CC"],
-                    "MPICXX": compilers_of_client["CXX"],
-                    "MPIF77": compilers_of_client["F77"],
-                    "MPIF90": compilers_of_client["F90"],
-                }
-            )
-        else:
-            compiler_wrapper_commands = self.mpi_compiler_wrappers
-            wrapper_vars.update(
-                {
-                    "MPICC": compiler_wrapper_commands["MPICC"],
-                    "MPICXX": compiler_wrapper_commands["MPICXX"],
-                    "MPIF77": compiler_wrapper_commands["MPIF77"],
-                    "MPIF90": compiler_wrapper_commands["MPIF90"],
-                }
-            )
+        compiler_wrapper_commands = self.mpi_compiler_wrappers
+        wrapper_vars.update(
+            {
+                "MPICC": compiler_wrapper_commands["MPICC"],
+                "MPICXX": compiler_wrapper_commands["MPICXX"],
+                "MPIF77": compiler_wrapper_commands["MPIF77"],
+                "MPIF90": compiler_wrapper_commands["MPIF90"],
+            }
+        )
 
         # Ensure that the directory containing the compiler wrappers is in the
         # PATH. Spack packages add `prefix.bin` to their dependents' paths,
@@ -1019,7 +1003,7 @@ class IntelPackage(Package):
             # Intel MPI since 2019 depends on libfabric which is not in the
             # lib directory but in a directory of its own which should be
             # included in the rpath
-            if self.version_yearlike >= ver("2019"):
+            if self.version_yearlike >= Version("2019"):
                 d = ancestor(self.component_lib_dir("mpi"))
                 if "+external-libfabric" in self.spec:
                     result += self.spec["libfabric"].libs

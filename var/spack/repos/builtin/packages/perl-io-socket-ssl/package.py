@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -10,20 +10,22 @@ from spack.package import *
 
 class PerlIoSocketSsl(PerlPackage):
     """SSL sockets with IO::Socket interface
-    
+
     FIXME: semi-broken due to issues with configure producing
     => Error: AttributeError: 'Adapter' object has no attribute 'build_method'
 
-The 'perl-io-socket-ssl' package cannot find an attribute while trying to build from sources. This might be due to a change in Spack's package format to support multiple build-systems for a single package. You can fix this by updating the build recipe, and you can also report the issue as a bug. More information at https://spack.readthedocs.io/en/latest/packaging_guide.html#installation-procedure 
-    
+The 'perl-io-socket-ssl' package cannot find an attribute while trying to build from sources. This might be due to a change in Spack's package format to support multiple build-systems for a single package. You can fix this by updating the build recipe, and you can also report the issue as a bug. More information at https://spack.readthedocs.io/en/latest/packaging_guide.html#installation-procedure
 
-    Commenting out configure entirely allows build/install to proceed but you have to know to hit <ENTER> to 
+
+    Commenting out configure entirely allows build/install to proceed but you have to know to hit <ENTER> to
     get around the perl test questions
     """
 
     homepage = "https://metacpan.org/dist/IO-Socket-SSL/view/lib/IO/Socket/SSL.pod"
     url = "https://cpan.metacpan.org/authors/id/S/SU/SULLR/IO-Socket-SSL-2.081.tar.gz"
+    license("GPL-1.0-or-later OR Artistic-1.0-Perl")
 
+    version("2.085", sha256="95b2f7c0628a7e246a159665fbf0620d0d7835e3a940f22d3fdd47c3aa799c2e")
     version("2.081", sha256="07bdf826a8d6b463316d241451c890d1012fa2499a83d8e3d00ce0a584618443")
     version("2.080", sha256="cd0ed303b08a72c5c256a9ec3bbb6ff61360be3a2ff6d775e4f6e25375fa8d1f")
     version("2.079", sha256="10352ba536a66f51d201b4e188325f3d53795d24bdc0dfbf3f1cb9ca354a5f77")
@@ -36,16 +38,3 @@ The 'perl-io-socket-ssl' package cannot find an attribute while trying to build 
     version("2.052", sha256="e4897a9b17cb18a3c44aa683980d52cef534cdfcb8063d6877c879bfa2f26673")
 
     depends_on("perl-net-ssleay", type=("build", "run"))
-
-    #def configure(self, spec, prefix):
-    #    #self.build_method = "Makefile.PL"
-    #    #self.build_executable = inspect.getmodule(self).make
-    #    # Should I do external tests?
-    #    config_answers = ["n\n"]
-    #    config_answers_filename = "spack-config.in"
-#
-#        with open(config_answers_filename, "w") as f:
-#            f.writelines(config_answers)
-
-        #with open(config_answers_filename, "r") as f:
-        #    inspect.getmodule(self).perl("Makefile.PL", "INSTALL_BASE={0}".format(prefix), input=f)

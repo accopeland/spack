@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -15,6 +15,7 @@ class Parallel(AutotoolsPackage, GNUMirrorPackage):
     homepage = "https://www.gnu.org/software/parallel/"
     gnu_mirror_path = "parallel/parallel-20220522.tar.bz2"
 
+<<<<<<< HEAD
     version("20230422", sha256="9106593d09dc4de0e094b7b14390a309d8fcb1d27104a53814d16937dcbae3c2")
     version("20230322", sha256="e5c7b1ba6d0cbc9d4dc58aa3e21c8970c5ae49b0fd0faf4eaf8bdbd6002b7bca")
     version("20230222", sha256="6d36a5ea097668ddb780e74e2ff00252da163995a4b1e96ef633a99b209c980e")
@@ -23,6 +24,11 @@ class Parallel(AutotoolsPackage, GNUMirrorPackage):
     version("20221122", sha256="aa3d9d22434df148d693f1a6232331a126729b6a22d2f7261b17fba9ad99539d")
     version("20221022", sha256="7530e7033afde74403a1dc6afae1fdc95fc15f25a18383d5b9886f9bce7c99be")
     version("20220922", sha256="15b3a149ddc1efce59e7cdff024057f141a7a0c9f2507bf62b2cb2bf21c9cac1")
+||||||| eb80f4d9af
+=======
+    license("GPL-3.0-or-later")
+
+>>>>>>> develop
     version("20220522", sha256="bb6395f8d964e68f3bdb26a764d3c48b69bc5b759a92ac3ab2bd1895c7fa8c1f")
     version("20220422", sha256="96e4b73fff1302fc141a889ae43ab2e93f6c9e86ac60ef62ced02dbe70b73ca7")
     version("20220322", sha256="df93ccf6a9f529ad2126b7042aef0486603e938c77b405939c41702d38a4e6d8")
@@ -52,6 +58,6 @@ class Parallel(AutotoolsPackage, GNUMirrorPackage):
 
         with working_dir("src"):
             match = "^#!/usr/bin/env perl|^#!/usr/bin/perl.*"
-            substitute = "#!{perl}".format(perl=perl)
+            substitute = f"#!{perl}"
             files = ["parallel", "niceload", "parcat", "sql"]
             filter_file(match, substitute, *files, **kwargs)

@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -113,13 +113,19 @@ def test_path_put_first(prepare_environment_for_tests):
     assert envutil.get_path("TEST_ENV_VAR") == expected
 
 
-def test_dump_environment(prepare_environment_for_tests, tmpdir):
+@pytest.mark.parametrize("shell", ["pwsh", "bat"] if sys.platform == "win32" else ["bash"])
+def test_dump_environment(prepare_environment_for_tests, shell_as, shell, tmpdir):
     test_paths = "/a:/b/x:/b/c"
     os.environ["TEST_ENV_VAR"] = test_paths
     dumpfile_path = str(tmpdir.join("envdump.txt"))
     envutil.dump_environment(dumpfile_path)
     with open(dumpfile_path, "r") as dumpfile:
-        assert "TEST_ENV_VAR={0}; export TEST_ENV_VAR\n".format(test_paths) in list(dumpfile)
+        if shell == "pwsh":
+            assert "$Env:TEST_ENV_VAR={}\n".format(test_paths) in list(dumpfile)
+        elif shell == "bat":
+            assert 'set "TEST_ENV_VAR={}"\n'.format(test_paths) in list(dumpfile)
+        else:
+            assert "TEST_ENV_VAR={0}; export TEST_ENV_VAR\n".format(test_paths) in list(dumpfile)
 
 
 def test_reverse_environment_modifications(working_env):
@@ -141,7 +147,8 @@ def test_reverse_environment_modifications(working_env):
 
     reversal = to_reverse.reversed()
 
-    os.environ = start_env.copy()
+    os.environ.clear()
+    os.environ.update(start_env)
 
     print(os.environ)
     to_reverse.apply_modifications()
@@ -151,3 +158,24 @@ def test_reverse_environment_modifications(working_env):
 
     start_env.pop("UNSET")
     assert os.environ == start_env
+
+
+def test_escape_double_quotes_in_shell_modifications():
+    to_validate = envutil.EnvironmentModifications()
+
+    to_validate.set("VAR", "$PATH")
+    to_validate.append_path("VAR", "$ANOTHER_PATH")
+
+    to_validate.set("QUOTED_VAR", '"MY_VAL"')
+
+    if sys.platform == "win32":
+        cmds = to_validate.shell_modifications(shell="bat")
+        assert r'set "VAR=$PATH;$ANOTHER_PATH"' in cmds
+        assert r'set "QUOTED_VAR="MY_VAL"' in cmds
+        cmds = to_validate.shell_modifications(shell="pwsh")
+        assert "$Env:VAR='$PATH;$ANOTHER_PATH'" in cmds
+        assert "$Env:QUOTED_VAR='\"MY_VAL\"'" in cmds
+    else:
+        cmds = to_validate.shell_modifications()
+        assert 'export VAR="$PATH:$ANOTHER_PATH"' in cmds
+        assert r'export QUOTED_VAR="\"MY_VAL\""' in cmds

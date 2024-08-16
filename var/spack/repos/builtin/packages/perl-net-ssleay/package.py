@@ -1,4 +1,4 @@
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
+# Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
@@ -8,21 +8,12 @@ import inspect
 from spack.package import *
 
 class PerlNetSsleay(PerlPackage):
-    """Perl extension for using OpenSSL
-    
-     FIXME: partially broken
-     => Error: AttributeError: 'Adapter' object has no attribute 'build_method'
-
-The 'perl-io-socket-ssl' package cannot find an attribute while trying to build from sources. This might be due to a change in Spack's package format to support multiple build-systems for a single package. You can fix this by updating the build recipe, and you can also report the issue as a bug. More information at https://spack.readthedocs.io/en/latest/packaging_guide.html#installation-procedure
-
-    Attempted to preserve openssl fix from '#9783 perl-net-ssleay: fix build'  with a 'setup_build_environment()'
-
-    Commenting out configure entirely allows build/install to proceed but you have to know to hit <ENTER> to
-    get around the perl test questions
-    """
+    """Perl extension for using OpenSSL"""
 
     homepage = "https://metacpan.org/pod/Net::SSLeay"
     url = "https://cpan.metacpan.org/authors/id/C/CH/CHRISN/Net-SSLeay-1.93_02.tar.gz"
+
+    license("Artistic-2.0")
 
     version("1.93_02", sha256="1a11d1ae63e9fc85c90279085957aec81a15af985d7cff185b66154f7032fcdf")
     version("1.93_01", sha256="876d022fbc719631b11d6bb4b6e78db3c19bbca578093c376c8f9900a4432aa3")
@@ -35,6 +26,7 @@ The 'perl-io-socket-ssl' package cannot find an attribute while trying to build 
     version("1.82", sha256="5895c519c9986a5e5af88e3b8884bbdc70e709ee829dc6abb9f53155c347c7e5")
 
     depends_on("perl")
+    depends_on("c", type="build")  # generated
     depends_on("openssl")
     depends_on("perl-mime-base64")
 
