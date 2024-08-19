@@ -1,39 +1,3 @@
-<<<<<<< HEAD
-# Copyright 2013-2023 Lawrence Livermore National Security, LLC and other
-# Spack Project Developers. See the top-level COPYRIGHT file for details.
-#
-# SPDX-License-Identifier: (Apache-2.0 OR MIT)
-
-from spack.package import *
-
-class Cheat(MakefilePackage): 
-    """ 
-    cheat allows you to create and view interactive
-    cheatsheets on the command-line. It was designed to help remind *nix system
-    administrators of options for commands that they use frequently, but not
-    frequently enough to remember.  
-    """
-
-    homepage = "https://github.com/cheat/cheat"
-    url = "https://github.com/cheat/cheat/archive/refs/tags/4.4.0.tar.gz"
-
-    version("4.4.0", sha256="8694d75896dcb1dfb91ed95ec37f7fe409ad2bde76e66f80b20be24ee92ae3ec")
-
-    depends_on("go")
-
-    def setup_build_environment(self, env):
-        env.prepend_path("GOPATH", self.stage.path)
-
-    def install(self, spec, prefix):
-        go_args = ["build"]
-        if self.spec.satisfies("+extended"):
-            go_args.extend(["--tags", "extended"])
-
-        go(*go_args)
-        mkdirp(prefix.bin)
-        install("hugo", prefix.bin)
-||||||| eb80f4d9af
-=======
 # Copyright 2013-2024 Lawrence Livermore National Security, LLC and other
 # Spack Project Developers. See the top-level COPYRIGHT file for details.
 #
@@ -42,12 +6,16 @@ class Cheat(MakefilePackage):
 
 from spack.package import *
 
-class Cheat(MakefilePackage): 
-    """ 
-    cheat allows you to create and view interactive
-    cheatsheets on the command-line. It was designed to help remind *nix system
-    administrators of options for commands that they use frequently, but not
-    frequently enough to remember.  
+
+class Cheat(GoPackage):
+    """
+    FIXME -- 
+    - a simple 'make' does not work; errors with 'go mod vendor'. 
+    - Adding a 'go mode vendor' step also fail.
+
+    cheat allows you to create and view interactive cheatsheets on the command-line. It was designed to help
+    remind *nix system administrators of options for commands that they use frequently, but not frequently
+    enough to remember.
     """
 
     homepage = "https://github.com/cheat/cheat"
@@ -67,4 +35,3 @@ class Cheat(MakefilePackage):
     version("4.2.5", sha256="727c19efb873e6ea29b922a480074da8e5b73a0d129c3277539484a736527033")
 
     depends_on("go@1.22:", type="build")
->>>>>>> develop
