@@ -48,13 +48,6 @@ class Go(Package):
     version("1.22.2", sha256="374ea82b289ec738e968267cac59c7d5ff180f9492250254784b2044e90df5a9")
     version("1.22.1", sha256="79c9b91d7f109515a25fc3ecdaad125d67e6bdb54f6d4d98580f46799caea321")
     version("1.22.0", sha256="4d196c3d41a0d6c1dfc64d04e3cc1f608b0c436bd87b7060ce3e23234e1f4d5c")
-    version("1.21.13", sha256="71fb31606a1de48d129d591e8717a63e0c5565ffba09a24ea9f899a13214c34d")
-    version("1.21.12", sha256="30e68af27bc1f1df231e3ab74f3d17d3b8d52a089c79bcaab573b4f1b807ed4f")
-    version("1.21.11", sha256="42aee9bf2b6956c75a7ad6aa3f0a51b5821ffeac57f5a2e733a2d6eae1e6d9d2")
-    version("1.21.10", sha256="900e0afe8900c1ee65a8a8c4f0c5a3ca02dcf85c1d1cb13a652be22c21399394")
-    version("1.21.9", sha256="58f0c5ced45a0012bce2ff7a9df03e128abcc8818ebabe5027bb92bafe20e421")
-    version("1.21.8", sha256="dc806cf75a87e1414b5b4c3dcb9dd3e9cc98f4cfccec42b7af617d5a658a3c43")
-    version("1.21.7", sha256="00197ab20f33813832bff62fd93cca1c42a08cc689a32a6672ca49591959bff6")
     version("1.21.6", sha256="124926a62e45f78daabbaedb9c011d97633186a33c238ffc1e25320c02046248")
     version("1.21.5", sha256="285cbbdf4b6e6e62ed58f370f3f6d8c30825d6e56c5853c66d3c23bcdb09db19")
     version("1.21.3", sha256="186f2b6f8c8b704e696821b09ab2041a5c1ee13dcbc3156a13adcf75931ee488")
@@ -62,8 +55,19 @@ class Go(Package):
     # https://nvd.nist.gov/vuln/detail/CVE-2024-24790
     # https://nvd.nist.gov/vuln/detail/CVE-2024-24789
     version(
-        "1.22.2",
-        sha256="374ea82b289ec738e968267cac59c7d5ff180f9492250254784b2044e90df5a9",
+        "1.21.3",
+        sha256="186f2b6f8c8b704e696821b09ab2041a5c1ee13dcbc3156a13adcf75931ee488",
+        deprecated=True,
+    )
+    version(
+        "1.20.6",
+        sha256="62ee5bc6fb55b8bae8f705e0cb8df86d6453626b4ecf93279e2867092e0b7f70",
+        deprecated=True,
+    )
+    # https://nvd.nist.gov/vuln/detail/CVE-2023-29405
+    version(
+        "1.20.4",
+        sha256="9f34ace128764b7a3a4b238b805856cc1b2184304df9e5690825b0710f4202d6",
         deprecated=True,
     )
     version(
@@ -89,9 +93,7 @@ class Go(Package):
 
     provides("golang")
 
-    depends_on("bash", type="build")
-    depends_on("sed", type="build")
-    depends_on("grep", type="build")
+    depends_on("git", type="run")
     depends_on("go-or-gccgo-bootstrap", type="build")
     depends_on("go-or-gccgo-bootstrap@1.17.13:", type="build", when="@1.20:")
     depends_on("go-or-gccgo-bootstrap@1.20.6:", type="build", when="@1.22:")
