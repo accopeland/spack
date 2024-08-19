@@ -8,7 +8,6 @@ from spack.package import *
 class Hpnssh(AutotoolsPackage):
     """HPN-SSH based on OpenSSH"""
 
-    # FIXME: Add a proper url for your package's homepage here.
     homepage = "https://github.com/rapier1/openssh-portable"
     url = "https://github.com/rapier1/openssh-portable/archive/refs/tags/hpn-9_2_P1.tar.gz"
     git = "https://github.com/rapier1/openssh-portable.git"
@@ -19,3 +18,5 @@ class Hpnssh(AutotoolsPackage):
     depends_on("autoconf")
     depends_on("automake")
     depends_on("libtool", type="build", when="@9_2_P1 build_system=autotools")
+    depends_on("openssl@1.1.0g:", type="run")
+    depends_on("libmd", type="run")
