@@ -32,19 +32,27 @@ class Duc(AutotoolsPackage):
     depends_on("libtool", type="build")
     depends_on("pkg-config", type="build")
     depends_on("m4", type="build")
-    depends_on("tokyocabinet") # unless +sqlite... how?
-    depends_on("cairo")  # variant does not work ... why?
-    depends_on("pango")  # variant does not work ... why?
 
-    variant("cairo", default=False, description="Enable cairo for graph support")
-    depends_on("cairo", when="+cairo")
-    depends_on("libx11", when="+cairo") #--enable-opengl --disable-x11
+    variant("leveldb", default=True, description="Use leveldb as db backend [True]")
+    depends_on("leveldb", when="+leveldb")
 
-    variant("sqlite", default=False, description="Use sqlite as db backend")
+    variant("sqlite", default=False, description="Use sqlite as db backend [False]")
     depends_on("sqlite@3:", when="+sqlite")
+
+    variant("lmdb", default=False, description="Use lmdb as db backend [False]")
+    depends_on("lmdb", when="+lmdb")
+
+    variant("tokyocabinet", default=False, description="Use tokyocabinet as db backend [False]")
+    depends_on("tokyocabinet") 
+    depends_on("tokyocabinet", when="+tokyocabinet")
 
     variant("ncurses", default=True, description="UI support via ncurses")
     depends_on("ncurses", when="+ncurses", type=["build", "run"])
+
+    variant("cairo", default=False, description="Enable cairo for graph support")
+    depends_on("cairo", when="+cairo")
+    depends_on("pango", when="+cairo")
+    depends_on("libx11", when="+cairo") #--enable-opengl --disable-x11
 
     @property
     def libs(self):
@@ -59,8 +67,14 @@ class Duc(AutotoolsPackage):
         # Need: LIBS="-ltinfo" ./configure --with-db-backend=sqlite3 --disable-cairo --disable-x11
         # args = ["--disable-ui", "--disable-cairo", "--disable-opengl", "--disable-x11"]
         config_args=["--disable-x11", "--disable-opengl"]
+        if self.spec.satisfies("+leveldb"):
+            config_args.append("--with-db-backend=leveldb")
         if self.spec.satisfies("+sqlite"):
-            config_args.append("--with-db-backend=sqlite3")
+            config_args.append("--with-db-backend=sqlite")
+        if self.spec.satisfies("+lmdb"):
+            config_args.append("--with-db-backend=lmdb")
+        if self.spec.satisfies("+tokyocabinet"):
+            config_args.append("--with-db-backend=tokyocabinet")
         if self.spec.satisfies("+cairo"):
             config_args.append("--enable-cairo")
         if self.spec.satisfies("+ncurses"):
