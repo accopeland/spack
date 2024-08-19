@@ -2858,6 +2858,7 @@ class EnvironmentManifestFile(collections.abc.Mapping):
             raise SpackEnvironmentError(msg) from e
         self.changed = True
 
+<<<<<<< HEAD
     def set_include_concrete(self, include_concrete: List[str]) -> None:
         """Sets the included concrete environments in the manifest to the value(s) passed as input.
 
@@ -2871,6 +2872,22 @@ class EnvironmentManifestFile(collections.abc.Mapping):
 
         self.changed = True
 
+||||||| f7afd67a26
+=======
+    def set_include_concrete(self, include_concrete: List[str]) -> None:
+        """Sets the included concrete environments in the manifest to the value(s) passed as input.
+
+        Args:
+            include_concrete: list of already existing concrete environments to include
+        """
+        self.pristine_configuration[included_concrete_name] = []
+
+        for env_path in include_concrete:
+            self.pristine_configuration[included_concrete_name].append(env_path)
+
+        self.changed = True
+
+>>>>>>> packages/slirp4netns
     def add_definition(self, user_spec: str, list_name: str) -> None:
         """Appends a user spec to the first active definition matching the name passed as argument.
 

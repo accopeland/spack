@@ -276,8 +276,41 @@ def display_env(env, args, decorator, results):
 
     print()
 
+<<<<<<< HEAD
     if env.included_concrete_envs:
         tty.msg("Included specs")
+||||||| f7afd67a26
+    if args.show_concretized:
+        tty.msg("Concretized roots")
+        cmd.display_specs(env.specs_by_hash.values(), args, decorator=decorator)
+        print()
+=======
+    if env.included_concrete_envs:
+        tty.msg("Included specs")
+
+        # Root specs cannot be displayed with prefixes, since those are not
+        # set for abstract specs. Same for hashes
+        root_args = copy.copy(args)
+        root_args.paths = False
+
+        # Roots are displayed with variants, etc. so that we can see
+        # specifically what the user asked for.
+        cmd.display_specs(
+            env.included_user_specs,
+            root_args,
+            decorator=lambda s, f: color.colorize("@*{%s}" % f),
+            namespace=True,
+            show_flags=True,
+            show_full_compiler=True,
+            variants=True,
+        )
+        print()
+
+    if args.show_concretized:
+        tty.msg("Concretized roots")
+        cmd.display_specs(env.specs_by_hash.values(), args, decorator=decorator)
+        print()
+>>>>>>> packages/slirp4netns
 
         # Root specs cannot be displayed with prefixes, since those are not
         # set for abstract specs. Same for hashes
