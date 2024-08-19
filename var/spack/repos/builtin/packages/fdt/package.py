@@ -18,5 +18,4 @@ class Fdt(MavenPackage):
     depends_on("java", type="run")
 
     def build(self, spec, prefix):
-        # FIXME: If not needed delete this function
         pass
