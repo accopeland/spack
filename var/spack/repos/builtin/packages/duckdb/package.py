@@ -11,13 +11,13 @@ class Duckdb(MakefilePackage):
     """DuckDB is an in-process SQL OLAP Database Management System."""
 
     homepage = "https://duckdb.org"
-    url = "https://github.com/duckdb/duckdb/archive/refs/tags/v0.9.2.tar.gz"
+    url = "https://github.com/duckdb/duckdb/archive/refs/tags/v1.0.0.tar.gz"
     git = "https://github.com/duckdb/duckdb.git"
 
     license("MIT")
     maintainers("glentner", "teaguesterling")
 
-    version("master", branch="master")
+    version("main", branch="main")
     version("1.0.0", sha256="04e472e646f5cadd0a3f877a143610674b0d2bcf9f4102203ac3c3d02f1c5f26")
     version("0.10.3", sha256="7855587b3491dd488993287caee28720bee43ae28e92e8f41ea4631e9afcbf88")
     version("0.10.2", sha256="662a0ba5c35d678ab6870db8f65ffa1c72e6096ad525a35b41b275139684cea6")
@@ -89,11 +89,12 @@ class Duckdb(MakefilePackage):
     variant("python", default=False, description="Build with Python driver (may not work)")
 
     # Observed failure in an AVX2-specific codeblock on x86_64_v4 target
-    conflicts(
-        "@1.0.0",
-        when="target=x86_64_v3:",
-        msg="See: https://github.com/duckdb/duckdb/issues/12362",
-    )
+    #conflicts(
+    #    "@1.0.0",
+    #    when="target=x86_64_v3:",
+    #    msg="See: https://github.com/duckdb/duckdb/issues/12362",
+    #)
+    #patch("avx2.patch", when="@1.0.0")
 
     def setup_build_environment(self, env):
         if "+ninjabuild" in self.spec:
