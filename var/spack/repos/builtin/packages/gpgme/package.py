@@ -15,6 +15,11 @@ class Gpgme(AutotoolsPackage):
 
     executables = ["^gpgme-config$"]
 
+    version("1.23.2", sha256="9499e8b1f33cccb6815527a1bc16049d35a6198a6c5fae0185f2bd561bce5224")
+    version("1.23.1", sha256="a0c316f7ab7d3bfb01a8753c3370dc906e5b61436021f3b54ff1483b513769bd")
+    version("1.23.0", sha256="043e2efe18b4ad22b96d434dde763fbed32cf8d6c220dc69df0d0ffb9dc66fc6")
+    version("1.22.0", sha256="9551e37081ad3bde81018a0d24f245c3f8206990549598fb31a97a68380a7b71")
+    version("1.21.0", sha256="416e174e165734d84806253f8c96bda2993fd07f258c3aad5f053a6efd463e88")
     version("1.20.0", sha256="25a5785a5da356689001440926b94e967d02e13c49eb7743e35ef0cf22e42750")
     version("1.19.0", sha256="cb58494dc415fba9eeb12b826550ad3190dc92e265c5bb2ae1a21c92841cfd38")
     version("1.18.0", sha256="361d4eae47ce925dba0ea569af40e7b52c645c4ae2e65e5621bf1b6cdd8b0e9e")
@@ -33,7 +38,7 @@ class Gpgme(AutotoolsPackage):
 
     depends_on("gnupg", type="build")
     depends_on("libgpg-error", type="build")
-    depends_on("libassuan", type="build")
+    depends_on("libassuan@2.4.2:2", type="build")
 
     @classmethod
     def determine_version(cls, exe):
