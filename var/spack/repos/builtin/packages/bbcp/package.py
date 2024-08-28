@@ -10,12 +10,14 @@ class Bbcp(Package):
     """Securely and quickly copy data from source to target"""
 
     homepage = "https://www.slac.stanford.edu/~abh/bbcp/"
+    list_url = "https://www.slac.stanford.edu/~abh/bbcp/dload.html"
     git = "https://www.slac.stanford.edu/~abh/bbcp/bbcp.git"
 
     maintainers("vanderwb")
 
     # Stanford's git server does not support "smart https" shallow clones
     version("master", branch="master", get_full_repo=True)
+
 
     depends_on("zlib-api")
     depends_on("openssl")
