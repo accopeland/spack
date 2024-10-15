@@ -13,13 +13,10 @@ class Entrezdirect(Package):
 
     homepage = "https://www.ncbi.nlm.nih.gov/books/NBK179288/"
     maintainers("snehring")
+    url = "https://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/versions/22.8.20241011/edirect-22.8.20241011.tar.gz"
 
-    version(
-        "22.6.20240912", sha256="ddf1aab438bfe6af7cf38f725dac6f288d0daf354197665a66d4556c91129ace"
-    )
-    version(
-        "10.7.20190114", sha256="4152749e6a3aac71a64e9367527428714ed16cf1fb6c7eff1298cca9ef144c0d"
-    )
+    version("22.6.20240912", sha256="ddf1aab438bfe6af7cf38f725dac6f288d0daf354197665a66d4556c91129ace")
+    version("10.7.20190114", sha256="4152749e6a3aac71a64e9367527428714ed16cf1fb6c7eff1298cca9ef144c0d")
 
     resource(
         name="rchive.ARM64",

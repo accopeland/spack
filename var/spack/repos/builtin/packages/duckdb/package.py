@@ -23,26 +23,10 @@ class Duckdb(MakefilePackage):
     version("1.0.0", sha256="04e472e646f5cadd0a3f877a143610674b0d2bcf9f4102203ac3c3d02f1c5f26")
     version("0.10.3", sha256="7855587b3491dd488993287caee28720bee43ae28e92e8f41ea4631e9afcbf88")
     version("0.10.2", sha256="662a0ba5c35d678ab6870db8f65ffa1c72e6096ad525a35b41b275139684cea6")
-    version(
-        "0.10.0",
-        sha256="5a925b8607d00a97c1a3ffe6df05c0a62a4df063abd022ada82ac1e917792013",
-        deprecated=True,
-    )
-    version(
-        "0.9.2",
-        sha256="afff7bd925a98dc2af4039b8ab2159b0705cbf5e0ee05d97f7bb8dce5f880dc2",
-        deprecated=True,
-    )
-    version(
-        "0.9.1",
-        sha256="37a43188d9354ce3ca101b2b118d867f5f76d04c3b83c09d86fd7508351a631b",
-        deprecated=True,
-    )
-    version(
-        "0.9.0",
-        sha256="3dbf3326a831bf0797591572440e81a3d6d668f8e33a25ce04efae19afc3a23d",
-        deprecated=True,
-    )
+    version("0.10.0",sha256="5a925b8607d00a97c1a3ffe6df05c0a62a4df063abd022ada82ac1e917792013",deprecated=True,)
+    version("0.9.2",sha256="afff7bd925a98dc2af4039b8ab2159b0705cbf5e0ee05d97f7bb8dce5f880dc2",deprecated=True,)
+    version("0.9.1",sha256="37a43188d9354ce3ca101b2b118d867f5f76d04c3b83c09d86fd7508351a631b",deprecated=True,)
+    version("0.9.0",sha256="3dbf3326a831bf0797591572440e81a3d6d668f8e33a25ce04efae19afc3a23d",deprecated=True,)
 
     depends_on("c", type="build")  # generated
     depends_on("cxx", type="build")  # generated
@@ -64,13 +48,7 @@ class Duckdb(MakefilePackage):
     variant("icu", default=False, description="Compile with bundled ICU library")
     variant("ninjabuild", default=True, description="Use GEN=ninja to build")
     variant("static_openssl", default=False, description="Build with static openSSL")
-    variant(
-        "openssl",
-        default=False,
-        description="Compile with bundled OpenSSL library",
-        when="@:0.9.2",
-    )
-
+    variant("openssl", default=False, description="Compile with bundled OpenSSL library", when="@:0.9.2")
     variant("extension_autoload", default=False, description="Enable extension auto-loading")
     variant("extension_autoinstall", default=False, description="Enable extension auto-installing")
     variant("extension_repo", default=True, description="Copy extensions to prefix")
@@ -91,15 +69,8 @@ class Duckdb(MakefilePackage):
     extends("python", when="+python")
 
     # Observed failure in an AVX2-specific codeblock on x86_64_v4 target
-    conflicts(
-        "@1.0.0",
-        when="target=x86_64_v3:",
-        msg="See: https://github.com/duckdb/duckdb/issues/12362",
-    )
-
-    @property
-    def duckdb_extension_prefix(self):
-        return self.prefix.lib.duckdb
+    #conflicts("@1.0.0", when="target=x86_64_v3:",msg="See: https://github.com/duckdb/duckdb/issues/12362")
+    #patch("avx2.patch", when="@1.0.0")
 
     def setup_build_environment(self, env):
         cmake_args = []  # Future use

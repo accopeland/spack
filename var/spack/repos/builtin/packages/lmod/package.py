@@ -65,9 +65,7 @@ class Lmod(AutotoolsPackage):
     depends_on("bc", type="build", when="@8.7.10:")
 
     variant("auto_swap", default=True, description="Auto swapping of compilers, etc.")
-    variant(
-        "redirect", default=False, description="Redirect messages to stdout (instead of stderr)"
-    )
+    variant("redirect", default=False, description="Redirect messages to stdout (instead of stderr)")
 
     patch("fix_tclsh_paths.patch", when="@:6.4.3")
     patch("0001-fix-problem-with-MODULESHOME-and-issue-271.patch", when="@7.3.28:7.4.10")
